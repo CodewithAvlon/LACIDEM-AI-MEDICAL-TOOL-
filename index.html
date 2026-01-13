@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LACIDEM - Medical Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============================================ -->
+<!-- LOGIN PAGE -->
+<!-- ============================================ -->
+<div id="loginPage" class="page active">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="login-container">
+            <div class="login-header">
+                <h1 style="font-size: 48px; font-weight: 700; letter-spacing: 4px; margin-bottom: 10px;">LACIDEM</h1>
+                <p style="font-size: 14px; opacity: 0.9;">Modern Medical Management System</p>
+            </div>
+            
+            <div class="p-8">
+                <div id="alertBox" class="alert"></div>
+                
+                <div class="role-selector">
+                    <button class="role-btn active" onclick="showLogin('admin', this)">Admin</button>
+                    <button class="role-btn" onclick="showLogin('user', this)">User</button>
+                </div>
+
+                <form id="adminForm" class="login-form" onsubmit="handleAdminLogin(event)">
+                    <div class="form-group">
+                        <label>Admin Password</label>
+                        <input type="password" id="adminPassword" placeholder="Enter admin password" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Login as Admin</button>
+                    <p style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
+                        Access administrative controls and management
+                    </p>
+                </form>
+
+                <form id="userForm" class="login-form" onsubmit="handleUserLogin(event)">
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="phoneNumber" pattern="[0-9]{10}" placeholder="Enter 10-digit phone number" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="userPassword" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Login as User</button>
+                    <p style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
+                        Demo: 1234567890 / pass123
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- ADMIN DASHBOARD -->
+<!-- ============================================ -->
+<div id="adminDashboard" class="page">
+    <div class="flex">
+        <!-- Sidebar -->
+        <div class="sidebar w-64 fixed h-screen overflow-y-auto">
+            <h2 class="text-3xl font-bold mb-2" style="letter-spacing: 2px;">LACIDEM</h2>
+            <p class="text-sm opacity-75 mb-8">Admin Portal</p>
+            <nav>
+                <div class="sidebar-item active" onclick="showAdminSection('overview')">
+                    <span class="icon">📊</span> Overview
+                </div>
+                <div class="sidebar-item" onclick="showAdminSection('predictions')">
+                    <span class="icon">📈</span> AI Predictions
+                </div>
+                <div class="sidebar-item" onclick="showAdminSection('orders')">
+                    <span class="icon">🛒</span> Order List
+                </div>
+                <div class="sidebar-item" onclick="showAdminSection('inventory')">
+                    <span class="icon">📦</span> Inventory
+                </div>
+                <div class="sidebar-item" onclick="showAdminSection('customer-orders')">
+                    <span class="icon">📋</span> Customer Orders
+                </div>
+                <div class="sidebar-item" onclick="showAdminSection('delivery')">
+                    <span class="icon">🚚</span> Delivery
+                </div>
+                <div class="sidebar-item" onclick="logout()">
+                    <span class="icon">🚪</span> Logout
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="ml-64 flex-1 p-8 bg-gradient-to-br from-teal-50 to-blue-50 min-h-screen">
+            <!-- Overview Section -->
+            <div id="adminOverview" class="admin-section"></div>
+
+            <!-- AI Predictions Section -->
+            <div id="adminPredictions" class="admin-section" style="display: none;"></div>
+
+            <!-- Orders Section -->
+            <div id="adminOrders" class="admin-section" style="display: none;"></div>
+
+            <!-- Inventory Section -->
+            <div id="adminInventory" class="admin-section" style="display: none;"></div>
+
+            <!-- Customer Orders Section -->
+            <div id="adminCustomerOrders" class="admin-section" style="display: none;">
+                <h1 class="text-4xl font-bold text-gray-800 mb-8">Customer Orders</h1>
+                <div class="space-y-4" id="adminCustomerOrdersList"></div>
+            </div>
+
+            <!-- Delivery Section -->
+            <div id="adminDelivery" class="admin-section" style="display: none;">
+                <h1 class="text-4xl font-bold text-gray-800 mb-8">Delivery Management</h1>
+                <div class="grid md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white rounded-xl p-6 shadow-lg text-center">
+                        <div class="text-4xl font-bold text-blue-500 mb-2">12</div>
+                        <div class="text-gray-600">Out for Delivery</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-lg text-center">
+                        <div class="text-4xl font-bold text-green-500 mb-2">45</div>
+                        <div class="text-gray-600">Delivered Today</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-lg text-center">
+                        <div class="text-4xl font-bold text-yellow-500 mb-2">8</div>
+                        <div class="text-gray-600">Ready to Ship</div>
+                    </div>
+                </div>
+                <div class="space-y-4" id="deliveryList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- USER DASHBOARD -->
+<!-- ============================================ -->
+<div id="userDashboard" class="page">
+    <!-- Navbar -->
+    <nav class="navbar sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <h1 class="text-3xl font-bold" style="color: var(--primary-dark); letter-spacing: 2px;">LACIDEM</h1>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#" onclick="showUserSection('home')" class="text-gray-700 hover:text-teal-600 font-medium">Home</a>
+                    <a href="#" onclick="showUserSection('search')" class="text-gray-700 hover:text-teal-600 font-medium">Search Medicine</a>
+                    <a href="#" onclick="showUserSection('nearby')" class="text-gray-700 hover:text-teal-600 font-medium">Nearby Stores</a>
+                    <a href="#" onclick="showUserSection('chatbot')" class="text-gray-700 hover:text-teal-600 font-medium">AI Assistant</a>
+                    <a href="#" onclick="showUserSection('news')" class="text-gray-700 hover:text-teal-600 font-medium">News</a>
+                    <a href="#" onclick="showUserSection('orders')" class="text-gray-700 hover:text-teal-600 font-medium">My Orders</a>
+                    <a href="#" onclick="showUserSection('cart')" class="text-gray-700 hover:text-teal-600 font-medium relative">
+                        <span class="flex items-center">
+                            🛒 Cart
+                            <span id="cartCount" class="ml-1 bg-red-500 text-white text-xs rounded-full px-2 py-1 hidden">0</span>
+                        </span>
+                    </a>
+                    <a href="#" onclick="showUserSection('wishlist')" class="text-gray-700 hover:text-teal-600 font-medium relative">
+                        <span class="flex items-center">
+                            ❤️ Wishlist
+                            <span id="wishlistCount" class="ml-1 bg-pink-500 text-white text-xs rounded-full px-2 py-1 hidden">0</span>
+                        </span>
+                    </a>
+                </div>
+                <button onclick="logout()" class="text-red-500 hover:text-red-600 font-medium">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- User Home Section -->
+    <div id="userHome" class="user-section">
+        <div class="container mx-auto px-4 py-8">
+            <div class="glass-card p-8 mb-8 relative z-10">
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h1 class="text-4xl font-bold mb-4" style="color: var(--primary-dark);">Welcome to LACIDEM</h1>
+                        <p class="text-lg text-gray-600 mb-6">Your health is our priority. Order medicines, find nearby stores, and get AI-powered health assistance.</p>
+                        <div class="flex gap-4">
+                            <button onclick="showUserSection('search')" class="btn-primary">Order Now</button>
+                            <button onclick="showUserSection('chatbot')" class="btn-secondary">Ask AI</button>
+                        </div>
+                    </div>
+                    <div class="flex justify-center">
+                        <div style="font-size: 150px;">💊</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="grid md:grid-cols-4 gap-6 mb-8">
+                <div class="stat-card">
+                    <div class="text-3xl font-bold mb-2">500+</div>
+                    <div class="text-sm opacity-90">Medicines Available</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <div class="text-3xl font-bold mb-2">50+</div>
+                    <div class="text-sm opacity-90">Partner Stores</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <div class="text-3xl font-bold mb-2">24/7</div>
+                    <div class="text-sm opacity-90">AI Support</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);">
+                    <div class="text-3xl font-bold mb-2">Fast</div>
+                    <div class="text-sm opacity-90">Home Delivery</div>
+                </div>
+            </div>
+
+            <!-- Featured Services -->
+            <h2 class="text-3xl font-bold mb-6" style="color: white;">Our Services</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="medicine-card">
+                    <div class="text-4xl mb-4">🔍</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Search Medicines</h3>
+                    <p class="text-gray-600 mb-4">Find any medicine from our vast database instantly</p>
+                    <button onclick="showUserSection('search')" style="color: var(--primary); font-weight: 600;">Explore →</button>
+                </div>
+
+                <div class="medicine-card">
+                    <div class="text-4xl mb-4">📍</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Nearby Stores</h3>
+                    <p class="text-gray-600 mb-4">Locate medical stores near your location</p>
+                    <button onclick="showUserSection('nearby')" style="color: var(--secondary); font-weight: 600;">Find Stores →</button>
+                </div>
+
+                <div class="medicine-card">
+                    <div class="text-4xl mb-4">🤖</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">AI Assistant</h3>
+                    <p class="text-gray-600 mb-4">Get medicine alternatives and health advice</p>
+                    <button onclick="showUserSection('chatbot')" style="color: #9333ea; font-weight: 600;">Chat Now →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Medicine Section -->
+    <div id="userSearch" class="user-section" style="display: none;">
+        <div class="container mx-auto px-4 py-8">
+            <h1 class="text-4xl font-bold text-white mb-8">Search Medicines</h1>
+            
+            <div class="glass-card p-6 mb-8">
+                <div class="flex gap-4 mb-4">
+                    <input id="medicineSearchInput" type="text" placeholder="Search by medicine name, composition, or disease..." class="flex-1">
+                    <button onclick="searchMedicine()" class="btn-primary">Search</button>
+                </div>
+                <div class="flex gap-4">
+                    <select id="categoryFilter" class="flex-1">
+                        <option value="">All Categories</option>
+                        <option value="painkillers">Painkillers</option>
+                        <option value="antibiotics">Antibiotics</option>
+                        <option value="vitamins">Vitamins</option>
+                        <option value="antacids">Antacids</option>
+                        <option value="diabetes">Diabetes</option>
+                    </select>
+                    <select id="priceFilter" class="flex-1">
+                        <option value="">All Prices</option>
+                        <option value="0-100">₹0 - ₹100</option>
+                        <option value="100-500">₹100 - ₹500</option>
+                        <option value="500+">₹500+</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="medicineResults" class="grid md:grid-cols-3 gap-6"></div>
+        </div>
+    </div>
+
+    <!-- Nearby Stores Section -->
+    <div id="userNearby" class="user-section" style="display: none;">
+        <div class="container mx-auto px-4 py-8">
+            <h1 class="text-4xl font-bold text-white mb-8">Nearby Medical Stores</h1>
+            <div class="grid md:grid-cols-2 gap-6" id="storesList"></div>
+        </div>
+    </div>
+
+    <!-- AI Chatbot Section -->
+    <div id="userChatbot" class="user-section" style="display: none;">
+        <div class="container mx-auto px-4 py-8">
+            <h1 class="text-4xl font-bold text-white mb-8">AI Health Assistant</h1>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="md:col-span-2">
+                    <div class="glass-card p-6">
+                        <div class="chat-container" id="chatMessages"></div>
+                        <div class="mt-4 flex gap-4">
+                            <input id="chatInput" type="text" placeholder="Ask about medicine alternatives, side effects, or health advice..." class="flex-1" onkeypress="if(event.key === 'Enter') sendMessage()">
+                            <button onclick="sendMessage()" class="btn-primary">Send</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="bg-white rounded-2xl p-6 mb-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Quick Questions</h3>
+                        <div class="space-y-2">
+                            <button onclick="askQuickQuestion('What are alternatives to Paracetamol?')" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 text-sm text-gray-700">What are alternatives to Paracetamol?</button>
+                            <button onclick="askQuickQuestion('Suggest medicine for headache')" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 text-sm text-gray-700">Suggest medicine for headache</button>
+                            <button onclick="askQuickQuestion('Side effects of antibiotics')" class="w-full text-left p-3 rounded-lg hover:bg-gray-100 text-sm text-gray-700">Side effects of antibiotics</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- News Section -->
+    <div id="userNews" class="user-section" style="display: none;">
+        <div class="container mx-auto px-4 py-8">
+            <h1 class="text-4xl font-bold text-white mb-8">Medicine & Health News</h1>
+            <div class="grid md:grid-cols-3 gap-6" id="newsList"></div>
+        </div>
+    </div>
+
+    <!-- Orders Section -->
+    <div id="userOrders" class="user-section" style="display: none;">
+        <div class="container mx-auto px-4 py-8">
+            <h1 class="text-4xl font-bold text-white mb-8">My Orders</h1>
+            <div class="space-y-6" id="ordersList"></div>
+        </div>
+    </div>
+
+    <!-- Cart Section -->
+    <div id="userCart" class="user-section" style="display: none;">
+        <div class="container mx-auto px-4 py-8">
+            <h1 class="text-4xl font-bold text-white mb-8">Shopping Cart</h1>
+            <div id="cartItems" class="space-y-4">
+                <!-- Cart items will be populated here -->
+            </div>
+            <div id="cartEmpty" class="text-center py-12">
+                <div class="text-6xl mb-4">🛒</div>
+                <h3 class="text-xl font-bold text-gray-300 mb-2">Your cart is empty</h3>
+                <p class="text-gray-400 mb-6">Add some medicines to get started!</p>
+                <button onclick="showUserSection('search')" class="btn-primary">Browse Medicines</button>
+            </div>
+            <div id="cartSummary" class="glass-card p-6 mt-8" style="display: none;">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Order Summary</h3>
+                <div class="space-y-2 mb-4">
+                    <div class="flex justify-between">
+                        <span>Subtotal:</span>
+                        <span id="cartSubtotal">₹0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Delivery:</span>
+                        <span id="cartDelivery">₹50</span>
+                    </div>
+                    <hr class="my-2">
+                    <div class="flex justify-between font-bold text-lg">
+                        <span>Total:</span>
+                        <span id="cartTotal">₹0</span>
+                    </div>
+                </div>
+                <button onclick="placeOrder()" class="btn-primary w-full">Place Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wishlist Section -->
+    <div id="userWishlist" class="user-section" style="display: none;">
+        <div class="container mx-auto px-4 py-8">
+            <h1 class="text-4xl font-bold text-white mb-8">My Wishlist</h1>
+            <div id="wishlistItems" class="grid md:grid-cols-3 gap-6">
+                <!-- Wishlist items will be populated here -->
+            </div>
+            <div id="wishlistEmpty" class="text-center py-12">
+                <div class="text-6xl mb-4">❤️</div>
+                <h3 class="text-xl font-bold text-gray-300 mb-2">Your wishlist is empty</h3>
+                <p class="text-gray-400 mb-6">Save medicines for later!</p>
+                <button onclick="showUserSection('search')" class="btn-primary">Browse Medicines</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
