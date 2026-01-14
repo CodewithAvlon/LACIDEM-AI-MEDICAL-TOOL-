@@ -1,6 +1,4 @@
-/* ============================================ */
-/* GLOBAL STYLES */
-/* ============================================ */
+
 * {
     margin: 0;
     padding: 0;
@@ -26,9 +24,7 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Outfit', sans-serif;
 }
 
-/* ============================================ */
-/* PAGE MANAGEMENT */
-/* ============================================ */
+
 .page {
     display: none;
     animation: fadeIn 0.5s ease-in-out;
@@ -53,9 +49,7 @@ h1, h2, h3, h4, h5, h6 {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ============================================ */
-/* LOGIN PAGE STYLES */
-/* ============================================ */
+
 .login-container {
     background: white;
     border-radius: 20px;
@@ -183,9 +177,7 @@ h1, h2, h3, h4, h5, h6 {
     animation: slideDown 0.3s ease-out;
 }
 
-/* ============================================ */
-/* BUTTON STYLES */
-/* ============================================ */
+
 .btn-primary {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
@@ -220,9 +212,7 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
 
-/* ============================================ */
-/* CARD STYLES */
-/* ============================================ */
+
 .glass-card {
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(10px);
@@ -310,9 +300,7 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
 }
 
-/* ============================================ */
-/* NAVBAR */
-/* ============================================ */
+
 .navbar {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
@@ -320,9 +308,7 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* ============================================ */
-/* SIDEBAR FOR ADMIN */
-/* ============================================ */
+
 .sidebar {
     background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
@@ -342,9 +328,7 @@ h1, h2, h3, h4, h5, h6 {
     background: rgba(255, 255, 255, 0.1);
 }
 
-/* ============================================ */
-/* CHAT STYLES */
-/* ============================================ */
+
 .chat-container {
     height: 500px;
     overflow-y: auto;
@@ -399,9 +383,7 @@ h1, h2, h3, h4, h5, h6 {
     40% { transform: scale(1); }
 }
 
-/* ============================================ */
-/* STOCK BADGE */
-/* ============================================ */
+
 .stock-badge {
     display: inline-block;
     padding: 4px 12px;
@@ -424,9 +406,7 @@ h1, h2, h3, h4, h5, h6 {
     color: white;
 }
 
-/* ============================================ */
-/* FORM INPUTS */
-/* ============================================ */
+
 input, select, textarea {
     width: 100%;
     padding: 12px 16px;
@@ -443,9 +423,7 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 0 0 3px rgba(58, 126, 111, 0.1);
 }
 
-/* ============================================ */
-/* UTILITY CLASSES */
-/* ============================================ */
+
 .icon { 
     font-size: 20px; 
 }
