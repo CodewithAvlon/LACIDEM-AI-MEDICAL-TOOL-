@@ -793,18 +793,34 @@ async function sendMessage() {
     addLoadingMessage();
 
     try {
-        // Using Anthropic's Claude API for the best AI responses
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': 'YOUR_ANTHROPIC_API_KEY_HERE', // 🔑 REPLACE WITH YOUR CLAUDE API KEY - See CLAUDE_SETUP.md
-                'anthropic-version': '2023-06-01'
+  // Using Groq API for fast AI responses
+const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': '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' // 🔑 Replace with your Groq API key
+    },
+    body: JSON.stringify({
+        model: 'llama3-70b-8192', // Best Groq model (or llama3-8b-8192 for faster/cheaper)
+        messages: [
+            {
+                role: 'system',
+                content: `You are LACIDEM, a highly knowledgeable and helpful AI health assistant in a medical management system.
+You provide accurate, evidence-based information about medicines, health conditions, and medical advice.`
             },
-            body: JSON.stringify({
-                model: 'claude-3-sonnet-20240229', // Using the best available Claude model
-                max_tokens: 1000,
-                system: `You are LACIDEM, a highly knowledgeable and helpful AI health assistant in a medical management system. You provide accurate, evidence-based information about medicines, health conditions, and medical advice.
+            {
+                role: 'user',
+                content: "Hello"
+            }
+        ],
+        max_tokens: 1000,
+        temperature: 0.7
+    })
+});
+
+const data = await response.json();
+console.log(data.choices[0].message.content);
+
 
 Key guidelines:
 - Always be helpful, accurate, and professional
