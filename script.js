@@ -694,156 +694,175 @@ function displayStores() {
     `).join('');
 }
 
+
+// ============================================
+// NURSE NINA CHATBOT — Direct Anthropic API
+// ============================================
+
+// ⬇️  PASTE YOUR ANTHROPIC API KEY HERE (get it from console.anthropic.com)
+const ANTHROPIC_API_KEY = 'YOUR_API_KEY_HERE';
+
+const NURSE_PROMPT = `You are Nurse Nina, a warm and expert virtual nurse for LACIDEM pharmacy system.
+
+When a user mentions ANY disease, symptom, medicine, or health question, always respond with this exact format:
+
+🩺 [Condition Name]
+[2-line explanation of what it is]
+
+💊 Medicines:
+• [Medicine name] ([brand]) — [dose] — [what it does]
+• [Medicine name] ([brand]) — [dose] — [what it does]
+• [Medicine name] ([brand]) — [dose] — [what it does]
+
+⚠️ Side Effects:
+• [side effect]
+• [side effect]
+
+🏠 Home Care:
+• [tip]
+• [tip]
+
+🚨 See a Doctor If:
+• [red flag]
+• [red flag]
+
+📋 Always consult a doctor before starting medication.
+
+Be specific with real medicine names and doses. Never be vague. Be like a real bedside nurse — warm, helpful, and practical. Handle any disease, symptom, medicine, or health question the user asks.`;
+
 function initializeChatbot() {
-    if (chatHistory.length === 0) {
-        addMessage('ai', "Hello! I'm your AI health assistant. I can help you find medicine alternatives, explain side effects, and provide health advice. How can I help you today?");
+    const container = document.getElementById('chatMessages');
+    if (chatHistory.length === 0 && container.children.length === 0) {
+        appendBubble('ai', '👩‍⚕️ Hi! I\'m <strong>Nurse Nina</strong>, your personal health assistant.<br><br>Ask me about any <strong>disease, symptom, or medicine</strong> and I\'ll give you detailed guidance with medicine names, dosages, and home care tips!<br><br><em>Example: "I have a headache", "What medicines for diabetes?", "Side effects of ibuprofen?"</em>');
     }
 }
 
-const SYSTEM_PROMPT = `You are LACIDEM, a knowledgeable and friendly AI health assistant built into a medical management system. You help users with:
-- Medicine information, dosage, and usage
-- Alternatives to common medications
-- Side effects and drug interactions
-- General health advice and wellness tips
-- Locating medicines and understanding prescriptions
-
-Always be clear, accurate, and professional. Include brief medical disclaimers where appropriate and recommend consulting a healthcare professional for serious conditions. Keep responses concise and easy to understand. You are not a replacement for professional medical advice.`;
-
-function addMessage(type, text) {
+function appendBubble(type, html) {
     const container = document.getElementById('chatMessages');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${type}`;
-    messageDiv.textContent = text;
-    container.appendChild(messageDiv);
+    const div = document.createElement('div');
+    div.className = 'message ' + type;
+    div.innerHTML = html;
+    div.style.animation = 'messageIn 0.3s ease';
+    container.appendChild(div);
     container.scrollTop = container.scrollHeight;
-    chatHistory.push({ role: type === 'user' ? 'user' : 'assistant', content: text });
 }
 
-function createStreamingBubble() {
-    const container = document.getElementById('chatMessages');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'message ai';
-    messageDiv.id = 'streamingMessage';
-    messageDiv.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
-    container.appendChild(messageDiv);
-    container.scrollTop = container.scrollHeight;
-    return messageDiv;
+function formatAIText(text) {
+    return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/^(🩺|💊|⚠️|🏠|🚨|📋)(.*)/gm, '<div style="margin-top:10px;font-weight:700;font-size:15px;">$1$2</div>')
+        .replace(/^•\s+(.*)/gm, '<div style="margin-left:14px;margin-top:3px;line-height:1.5">• $1</div>')
+        .replace(/\n\n/g, '<br>')
+        .replace(/\n/g, '<br>');
 }
 
-// ============================================
-// CHATBOT - Real-time Anthropic Streaming
-// ============================================
 async function sendMessage() {
     const input = document.getElementById('chatInput');
-    const sendBtn = document.querySelector('#userChatbot .btn-primary');
-    const message = input.value.trim();
-    if (!message) return;
+    const btn = document.getElementById('chatSendBtn');
+    const msg = input.value.trim();
+    if (!msg) return;
 
-    // Disable input while streaming
-    input.disabled = true;
-    if (sendBtn) sendBtn.disabled = true;
-
-    addMessage('user', message);
+    // show user message
+    appendBubble('user', escapeHtml(msg));
+    chatHistory.push({ role: 'user', content: msg });
     input.value = '';
+    input.disabled = true;
+    if (btn) { btn.disabled = true; btn.textContent = '...'; }
 
-    // Build message history for context (last 10 turns)
-    const recentHistory = chatHistory.slice(-10);
-    const messages = recentHistory.map(m => ({ role: m.role, content: m.content }));
+    // typing indicator
+    const typing = document.createElement('div');
+    typing.className = 'message ai';
+    typing.id = 'nurseTyping';
+    typing.innerHTML = '<span style="font-size:18px">👩‍⚕️</span> <div class="loading-dots"><span></span><span></span><span></span></div>';
+    typing.style.display = 'flex';
+    typing.style.alignItems = 'center';
+    typing.style.gap = '8px';
+    document.getElementById('chatMessages').appendChild(typing);
+    document.getElementById('chatMessages').scrollTop = 99999;
 
-    // Create streaming bubble
-    const bubble = createStreamingBubble();
-    let fullText = '';
-    let started = false;
+    // Check API key
+    if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === 'YOUR_API_KEY_HERE') {
+        document.getElementById('nurseTyping')?.remove();
+        appendBubble('ai', '⚠️ <strong>API key not set!</strong><br>Open <code>script.js</code>, find line:<br><code>const ANTHROPIC_API_KEY = \'YOUR_API_KEY_HERE\';</code><br>and replace with your key from <a href="https://console.anthropic.com" target="_blank" style="color:var(--primary)">console.anthropic.com</a>');
+        input.disabled = false;
+        if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+        return;
+    }
 
     try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
+        // last 10 messages for context
+        const messages = chatHistory.slice(-10).map(m => ({ role: m.role, content: m.content }));
+
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-api-key': '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',        // ← Paste your Anthropic API key here
+                'x-api-key': ANTHROPIC_API_KEY,
                 'anthropic-version': '2023-06-01',
                 'anthropic-dangerous-direct-browser-access': 'true'
             },
             body: JSON.stringify({
                 model: 'claude-haiku-4-5-20251001',
-                max_tokens: 1024,
-                system: SYSTEM_PROMPT,
+                max_tokens: 1500,
+                system: NURSE_PROMPT,
                 messages: messages,
                 stream: true
             })
         });
 
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
+        document.getElementById('nurseTyping')?.remove();
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error?.message || `HTTP ${res.status}`);
         }
 
-        const reader = response.body.getReader();
+        // Create streaming bubble
+        const bubble = document.createElement('div');
+        bubble.className = 'message ai';
+        bubble.innerHTML = '<span style="font-size:18px;margin-right:6px;">👩‍⚕️</span>';
+        document.getElementById('chatMessages').appendChild(bubble);
+
+        const reader = res.body.getReader();
         const decoder = new TextDecoder();
+        let fullText = '';
 
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split('\n');
-
+            const lines = decoder.decode(value, { stream: true }).split('\n');
             for (const line of lines) {
                 if (!line.startsWith('data: ')) continue;
-                const data = line.slice(6).trim();
-                if (data === '[DONE]' || !data) continue;
-
+                const raw = line.slice(6).trim();
+                if (!raw || raw === '[DONE]') continue;
                 try {
-                    const parsed = JSON.parse(data);
-                    if (parsed.type === 'content_block_delta' && parsed.delta?.type === 'text_delta') {
-                        if (!started) {
-                            bubble.innerHTML = '';
-                            started = true;
-                        }
-                        fullText += parsed.delta.text;
-                        bubble.textContent = fullText;
-                        document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+                    const j = JSON.parse(raw);
+                    if (j.type === 'content_block_delta' && j.delta?.type === 'text_delta') {
+                        fullText += j.delta.text;
+                        bubble.innerHTML = '<span style="font-size:18px;margin-right:6px;">👩‍⚕️</span>' + formatAIText(fullText);
+                        document.getElementById('chatMessages').scrollTop = 99999;
                     }
-                } catch (e) { /* skip malformed chunks */ }
+                } catch(e) {}
             }
         }
 
-        bubble.removeAttribute('id');
-        if (fullText) {
-            chatHistory.push({ role: 'assistant', content: fullText });
-        }
+        chatHistory.push({ role: 'assistant', content: fullText });
 
-    } catch (error) {
-        console.error('Streaming error:', error);
-        bubble.innerHTML = '';
-        const fallback = generateFallbackResponse(message.toLowerCase());
-        bubble.textContent = fallback;
-        bubble.removeAttribute('id');
-        chatHistory.push({ role: 'assistant', content: fallback });
+    } catch (err) {
+        document.getElementById('nurseTyping')?.remove();
+        console.error(err);
+        appendBubble('ai', '❌ <strong>Error:</strong> ' + escapeHtml(err.message) + '<br><small>Make sure your API key is correct and has credits.</small>');
     } finally {
         input.disabled = false;
-        if (sendBtn) sendBtn.disabled = false;
+        if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
         input.focus();
     }
 }
 
-function generateFallbackResponse(message) {
-    if (message.includes('paracetamol') || message.includes('pain') || message.includes('fever'))
-        return "Paracetamol is commonly used for pain relief and fever. Alternatives include Ibuprofen or Aspirin. Always follow dosage instructions and consult a doctor if symptoms persist.";
-    if (message.includes('headache') || message.includes('migraine'))
-        return "For headaches, Paracetamol or Ibuprofen are usually effective. Stay hydrated and rest. If headaches are frequent or severe, please consult a doctor.";
-    if (message.includes('antibiotic') || message.includes('infection'))
-        return "Antibiotics should only be taken when prescribed by a doctor. Always complete the full course. Consult your doctor for proper diagnosis.";
-    if (message.includes('vitamin') || message.includes('supplement'))
-        return "Vitamin D3 is essential for bone health. Always check with your doctor before starting supplements.";
-    if (message.includes('diabetes') || message.includes('blood sugar'))
-        return "For diabetes management, Metformin is commonly prescribed. Monitor blood sugar regularly and consult your endocrinologist.";
-    if (message.includes('allergy') || message.includes('cetirizine'))
-        return "Cetirizine (10mg) is effective for allergies. It can cause drowsiness. Loratadine is a non-drowsy alternative.";
-    if (message.includes('acidity') || message.includes('gerd') || message.includes('omeprazole'))
-        return "Omeprazole helps with acid reflux and GERD. Take it 30 minutes before meals.";
-    if (message.includes('side effect'))
-        return "Side effects vary by medication. Always read the package insert and consult your doctor. Stop medication and seek help if you experience severe reactions.";
-    return "I'm here to help with medicine information, alternatives, side effects, and general health advice. For serious conditions or emergencies, please consult a healthcare professional immediately.";
+function escapeHtml(t) {
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function askQuickQuestion(question) {
@@ -851,6 +870,9 @@ function askQuickQuestion(question) {
     sendMessage();
 }
 
+// ============================================
+// NEWS
+// ============================================
 function displayNews() {
     const container = document.getElementById('newsList');
     container.innerHTML = sampleNews.map(news => `
@@ -863,12 +885,15 @@ function displayNews() {
                 </div>
                 <h3 class="text-xl font-bold text-gray-800 mb-2">${news.title}</h3>
                 <p class="text-gray-600 mb-4">${news.summary}</p>
-                <button style="color: var(--primary); font-weight: 600; background:none; border:none; cursor:pointer;">Read More →</button>
+                <button style="color:var(--primary);font-weight:600;background:none;border:none;cursor:pointer;">Read More →</button>
             </div>
         </div>
     `).join('');
 }
 
+// ============================================
+// USER ORDERS
+// ============================================
 function displayUserOrders() {
     const orders = [
         { id: 'ORD-001', date: 'Jan 10, 2026', items: 3, total: 450, status: 'Delivered' },
@@ -902,7 +927,5 @@ function displayUserOrders() {
 document.addEventListener('DOMContentLoaded', function() {
     showPage('loginPage');
     const adminButton = document.querySelector('.role-btn.active');
-    if (adminButton) {
-        showLogin('admin', adminButton);
-    }
+    if (adminButton) showLogin('admin', adminButton);
 });
