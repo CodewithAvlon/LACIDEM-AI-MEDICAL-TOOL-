@@ -700,7 +700,7 @@ function displayStores() {
 // ============================================
 
 // ⬇️  PASTE YOUR ANTHROPIC API KEY HERE (get it from console.anthropic.com)
-const ANTHROPIC_API_KEY = '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';
+const ANTHROPIC_API_KEY = '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';
 
 const NURSE_PROMPT = `You are Nurse Nina, a warm and expert virtual nurse for LACIDEM pharmacy system.
 
