@@ -700,7 +700,7 @@ function displayStores() {
 // ============================================
 
 // ⬇️  PASTE YOUR ANTHROPIC API KEY HERE (get it from console.anthropic.com)
-const ANTHROPIC_API_KEY = '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';
+const ANTHROPIC_API_KEY = 'YOUR_API_KEY_HERE';
 
 const NURSE_PROMPT = `You are Nurse Nina, a warm and expert virtual nurse for LACIDEM pharmacy system.
 
@@ -806,8 +806,7 @@ async function sendMessage() {
                 model: 'claude-haiku-4-5-20251001',
                 max_tokens: 1500,
                 system: NURSE_PROMPT,
-                messages: messages,
-                stream: true
+                messages: messages
             })
         });
 
@@ -818,37 +817,32 @@ async function sendMessage() {
             throw new Error(err.error?.message || `HTTP ${res.status}`);
         }
 
-        // Create streaming bubble
+        const data = await res.json();
+        const fullText = data.content[0].text;
+        chatHistory.push({ role: 'assistant', content: fullText });
+
+        // Typewriter effect
         const bubble = document.createElement('div');
         bubble.className = 'message ai';
         bubble.innerHTML = '<span style="font-size:18px;margin-right:6px;">👩‍⚕️</span>';
         document.getElementById('chatMessages').appendChild(bubble);
 
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let fullText = '';
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const lines = decoder.decode(value, { stream: true }).split('\n');
-            for (const line of lines) {
-                if (!line.startsWith('data: ')) continue;
-                const raw = line.slice(6).trim();
-                if (!raw || raw === '[DONE]') continue;
-                try {
-                    const j = JSON.parse(raw);
-                    if (j.type === 'content_block_delta' && j.delta?.type === 'text_delta') {
-                        fullText += j.delta.text;
-                        bubble.innerHTML = '<span style="font-size:18px;margin-right:6px;">👩‍⚕️</span>' + formatAIText(fullText);
-                        document.getElementById('chatMessages').scrollTop = 99999;
-                    }
-                } catch(e) {}
+                // Typewriter animation
+        let i = 0;
+        await new Promise(resolve => {
+            function typeNext() {
+                if (i < fullText.length) {
+                    bubble.innerHTML = '<span style="font-size:18px;margin-right:6px;">👩\u200d⚕️</span>' + formatAIText(fullText.slice(0, i + 1));
+                    document.getElementById('chatMessages').scrollTop = 99999;
+                    i += 3;
+                    setTimeout(typeNext, 8);
+                } else {
+                    bubble.innerHTML = '<span style="font-size:18px;margin-right:6px;">👩\u200d⚕️</span>' + formatAIText(fullText);
+                    resolve();
+                }
             }
-        }
-
-        chatHistory.push({ role: 'assistant', content: fullText });
+            typeNext();
+        });
 
     } catch (err) {
         document.getElementById('nurseTyping')?.remove();
