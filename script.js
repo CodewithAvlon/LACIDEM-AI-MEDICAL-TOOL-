@@ -123,7 +123,6 @@ function handleUserLogin(event) {
     showAlert('Login successful! Redirecting...', 'success');
     setTimeout(() => {
         currentUser = { type: 'user', name: 'User', phone: phoneNumber };
-        // Initialize cart and wishlist for new session
         cart = [];
         wishlist = [];
         updateCartCount();
@@ -160,7 +159,6 @@ function generateSampleData() {
             { month: 'Oct 2024', quantity: Math.floor(Math.random() * 200) + 150 }
         ]
     }));
-
     return { medicines: sampleMedicines, historicalData };
 }
 
@@ -234,7 +232,6 @@ function renderAdminOverview() {
 
     container.innerHTML = `
         <h1 class="text-4xl font-bold text-gray-800 mb-8">📊 Store Overview</h1>
-        
         <div class="grid md:grid-cols-4 gap-6 mb-8">
             <div class="bg-white rounded-xl p-6 shadow-lg">
                 <div class="text-4xl font-bold mb-2" style="color: var(--primary);">${medicines.length}</div>
@@ -253,12 +250,8 @@ function renderAdminOverview() {
                 <div class="text-gray-600">Order Value</div>
             </div>
         </div>
-
         <div class="bg-white p-6 rounded-lg shadow mb-8">
-            <h3 class="text-xl font-bold mb-4 flex items-center">
-                <span class="text-2xl mr-2">⚠️</span>
-                Critical Alerts
-            </h3>
+            <h3 class="text-xl font-bold mb-4">⚠️ Critical Alerts</h3>
             ${lowStockCount > 0 ? 
                 medicines.filter(m => m.stock < m.reorderLevel).map(med => `
                     <div class="flex items-center justify-between p-3 bg-red-50 rounded border-l-4 border-red-500 mb-2">
@@ -272,10 +265,9 @@ function renderAdminOverview() {
                 '<p class="text-green-600">All medicines are adequately stocked!</p>'
             }
         </div>
-
         <div class="bg-white p-6 rounded-lg shadow">
             <h3 class="text-xl font-bold mb-4">Top Selling Medicines</h3>
-            ${medicines.slice(0, 5).map((med, idx) => `
+            ${medicines.slice(0, 5).map(med => `
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
                     <span class="font-medium text-gray-800">${med.name}</span>
                     <span class="font-semibold" style="color: var(--primary);">${Math.floor(Math.random() * 500) + 100} units</span>
@@ -294,7 +286,6 @@ function renderAdminPredictions() {
             <h2 class="text-2xl font-bold mb-2">🤖 AI-Powered Demand Forecasting</h2>
             <p>Predictions based on last 3 months data with 15% safety buffer</p>
         </div>
-
         <div class="grid gap-4">
             ${predictions.map(pred => `
                 <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
@@ -342,12 +333,9 @@ function renderAdminOrders() {
                 </div>
             </div>
             <div class="bg-gradient-to-r from-green-50 to-teal-50 p-4 rounded-lg">
-                <p class="text-gray-700">
-                    Estimated Total Cost: <span class="text-2xl font-bold text-green-600">₹${totalCost.toLocaleString()}</span>
-                </p>
+                <p class="text-gray-700">Estimated Total Cost: <span class="text-2xl font-bold text-green-600">₹${totalCost.toLocaleString()}</span></p>
             </div>
         </div>
-
         ${orders.length > 0 ? `
             <div class="bg-white rounded-lg shadow overflow-hidden">
                 <table class="w-full">
@@ -386,7 +374,6 @@ function renderAdminOrders() {
             <div class="bg-white p-12 rounded-lg shadow text-center">
                 <div class="text-6xl text-gray-300 mb-4">📦</div>
                 <p class="text-xl text-gray-500">No orders needed at this time!</p>
-                <p class="text-gray-400 mt-2">All medicines are adequately stocked.</p>
             </div>
         `}
     `;
@@ -398,7 +385,6 @@ function renderAdminInventory() {
 
     container.innerHTML = `
         <h1 class="text-4xl font-bold text-gray-800 mb-8">📦 Current Inventory</h1>
-        
         <div class="grid gap-4">
             ${medicines.map(med => `
                 <div class="bg-white border rounded-lg p-4 hover:shadow-md transition">
@@ -419,8 +405,7 @@ function renderAdminInventory() {
                     </div>
                     <div class="bg-gray-200 rounded-full h-2">
                         <div class="h-2 rounded-full ${med.stock < med.reorderLevel ? 'bg-red-500' : 'bg-green-500'}" 
-                             style="width: ${Math.min((med.stock / (med.reorderLevel * 2)) * 100, 100)}%">
-                        </div>
+                             style="width: ${Math.min((med.stock / (med.reorderLevel * 2)) * 100, 100)}%"></div>
                     </div>
                 </div>
             `).join('')}
@@ -430,10 +415,9 @@ function renderAdminInventory() {
 
 function renderCustomerOrders() {
     const orders = [
-        { id: 'ORD-156', customer: 'John Doe', phone: '+91 98765 43210', items: ['Paracetamol x2', 'Vitamin D3 x1'], amount: 450, status: 'Processing', address: '123 Main St' },
-        { id: 'ORD-155', customer: 'Jane Smith', phone: '+91 98765 43211', items: ['Azithromycin x1'], amount: 180, status: 'Completed', address: '456 Park Ave' },
+        { id: 'ORD-156', customer: 'John Doe', phone: '+91 98765 43210', items: ['Paracetamol x2', 'Vitamin D3 x1'], amount: 450, status: 'Processing' },
+        { id: 'ORD-155', customer: 'Jane Smith', phone: '+91 98765 43211', items: ['Azithromycin x1'], amount: 180, status: 'Completed' },
     ];
-    
     const container = document.getElementById('adminCustomerOrdersList');
     container.innerHTML = orders.map(order => `
         <div class="bg-white rounded-xl p-6 shadow-lg">
@@ -442,13 +426,11 @@ function renderCustomerOrders() {
                     <h3 class="text-xl font-bold text-gray-800">${order.id}</h3>
                     <p class="text-sm text-gray-600">${order.customer} - ${order.phone}</p>
                 </div>
-                <span class="badge ${order.status === 'Completed' ? 'bg-green-500' : 'bg-blue-500'}">${order.status}</span>
+                <span class="badge" style="background:${order.status === 'Completed' ? '#22c55e' : '#3b82f6'}">${order.status}</span>
             </div>
             <div class="mb-4">
                 <p class="text-sm text-gray-600 mb-2">Items:</p>
-                <ul class="list-disc list-inside text-gray-700">
-                    ${order.items.map(item => `<li>${item}</li>`).join('')}
-                </ul>
+                <ul class="list-disc list-inside text-gray-700">${order.items.map(i => `<li>${i}</li>`).join('')}</ul>
             </div>
             <div class="flex items-center justify-between">
                 <span class="text-2xl font-bold text-gray-800">₹${order.amount}</span>
@@ -463,7 +445,6 @@ function renderDelivery() {
         { id: 'DEL-045', orderId: 'ORD-156', customer: 'John Doe', driver: 'Rahul Kumar', status: 'Out for Delivery', eta: '15 mins' },
         { id: 'DEL-044', orderId: 'ORD-155', customer: 'Jane Smith', driver: 'Priya Patel', status: 'Delivered', eta: '-' },
     ];
-    
     const container = document.getElementById('deliveryList');
     container.innerHTML = deliveries.map(del => `
         <div class="bg-white rounded-xl p-6 shadow-lg">
@@ -472,23 +453,12 @@ function renderDelivery() {
                     <h3 class="text-xl font-bold text-gray-800">${del.id}</h3>
                     <p class="text-sm text-gray-600">Order: ${del.orderId}</p>
                 </div>
-                <span class="badge ${del.status === 'Delivered' ? 'bg-green-500' : 'bg-blue-500'}">${del.status}</span>
+                <span class="badge" style="background:${del.status === 'Delivered' ? '#22c55e' : '#3b82f6'}">${del.status}</span>
             </div>
             <div class="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                    <p class="text-sm text-gray-500">Customer</p>
-                    <p class="font-semibold text-gray-800">${del.customer}</p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500">Driver</p>
-                    <p class="font-semibold text-gray-800">${del.driver}</p>
-                </div>
-                ${del.eta !== '-' ? `
-                    <div>
-                        <p class="text-sm text-gray-500">ETA</p>
-                        <p class="font-semibold text-blue-600">${del.eta}</p>
-                    </div>
-                ` : ''}
+                <div><p class="text-sm text-gray-500">Customer</p><p class="font-semibold">${del.customer}</p></div>
+                <div><p class="text-sm text-gray-500">Driver</p><p class="font-semibold">${del.driver}</p></div>
+                ${del.eta !== '-' ? `<div><p class="text-sm text-gray-500">ETA</p><p class="font-semibold text-blue-600">${del.eta}</p></div>` : ''}
             </div>
             <button class="btn-primary w-full">Track Delivery</button>
         </div>
@@ -514,16 +484,11 @@ function showUserSection(sectionId) {
 function searchMedicine() {
     const searchTerm = document.getElementById('medicineSearchInput').value.toLowerCase();
     const category = document.getElementById('categoryFilter').value;
-    
-    let filtered = sampleMedicines.filter(med => 
-        med.name.toLowerCase().includes(searchTerm) || 
+    let filtered = sampleMedicines.filter(med =>
+        med.name.toLowerCase().includes(searchTerm) ||
         med.description.toLowerCase().includes(searchTerm)
     );
-    
-    if (category) {
-        filtered = filtered.filter(med => med.category === category);
-    }
-    
+    if (category) filtered = filtered.filter(med => med.category === category);
     displayMedicines(filtered);
 }
 
@@ -536,11 +501,9 @@ function displayMedicines(medicines) {
             <p class="text-gray-600 text-sm mb-3">${med.description}</p>
             <div class="flex items-center justify-between mb-3">
                 <span class="text-2xl font-bold" style="color: var(--primary);">₹${med.price}</span>
-                <span class="stock-badge ${med.stock > 200 ? 'stock-high' : med.stock > 50 ? 'stock-medium' : 'stock-low'}">
-                    ${med.stock} in stock
-                </span>
+                <span class="stock-badge ${med.stock > 200 ? 'stock-high' : med.stock > 50 ? 'stock-medium' : 'stock-low'}">${med.stock} in stock</span>
             </div>
-            <div class="flex gap-2 mb-2">
+            <div class="flex gap-2">
                 <button onclick="addToCart(${med.id})" class="btn-primary flex-1">Add to Cart</button>
                 <button onclick="addToWishlist(${med.id})" class="btn-secondary flex-1">❤️ Wishlist</button>
             </div>
@@ -551,14 +514,12 @@ function displayMedicines(medicines) {
 function addToCart(medicineId) {
     const medicine = sampleMedicines.find(med => med.id === medicineId);
     if (!medicine) return;
-
     const existingItem = cart.find(item => item.id === medicineId);
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
         cart.push({ ...medicine, quantity: 1 });
     }
-    
     updateCartCount();
     showAlert('Medicine added to cart! 🛒', 'success');
 }
@@ -566,7 +527,6 @@ function addToCart(medicineId) {
 function addToWishlist(medicineId) {
     const medicine = sampleMedicines.find(med => med.id === medicineId);
     if (!medicine) return;
-
     if (!wishlist.find(item => item.id === medicineId)) {
         wishlist.push(medicine);
         updateWishlistCount();
@@ -615,7 +575,6 @@ function updateCartQuantity(medicineId, newQuantity) {
         removeFromCart(medicineId);
         return;
     }
-    
     const item = cart.find(item => item.id === medicineId);
     if (item) {
         item.quantity = newQuantity;
@@ -638,7 +597,6 @@ function displayCart() {
     
     emptyState.style.display = 'none';
     summary.style.display = 'block';
-    
     container.innerHTML = cart.map(item => `
         <div class="glass-card p-6">
             <div class="flex items-center justify-between mb-4">
@@ -649,37 +607,33 @@ function displayCart() {
                         <p class="text-gray-600 text-sm">${item.description}</p>
                     </div>
                 </div>
-                <button onclick="removeFromCart(${item.id})" class="text-red-500 hover:text-red-700 text-xl">×</button>
+                <button onclick="removeFromCart(${item.id})" style="color:red;font-size:24px;background:none;border:none;cursor:pointer;">×</button>
             </div>
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <span class="text-2xl font-bold" style="color: var(--primary);">₹${item.price}</span>
                     <div class="flex items-center gap-2">
-                        <button onclick="updateCartQuantity(${item.id}, ${item.quantity - 1})" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">-</button>
+                        <button onclick="updateCartQuantity(${item.id}, ${item.quantity - 1})" style="background:#e5e7eb;padding:4px 12px;border:none;border-radius:6px;cursor:pointer;font-size:16px;">-</button>
                         <span class="font-semibold">${item.quantity}</span>
-                        <button onclick="updateCartQuantity(${item.id}, ${item.quantity + 1})" class="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">+</button>
+                        <button onclick="updateCartQuantity(${item.id}, ${item.quantity + 1})" style="background:#e5e7eb;padding:4px 12px;border:none;border-radius:6px;cursor:pointer;font-size:16px;">+</button>
                     </div>
                 </div>
                 <span class="text-xl font-bold text-gray-800">₹${item.price * item.quantity}</span>
             </div>
         </div>
     `).join('');
-    
     updateCartSummary();
 }
 
 function displayWishlist() {
     const container = document.getElementById('wishlistItems');
     const emptyState = document.getElementById('wishlistEmpty');
-    
     if (wishlist.length === 0) {
         container.innerHTML = '';
         emptyState.style.display = 'block';
         return;
     }
-    
     emptyState.style.display = 'none';
-    
     container.innerHTML = wishlist.map(item => `
         <div class="medicine-card">
             <div class="text-4xl mb-3">💊</div>
@@ -687,11 +641,9 @@ function displayWishlist() {
             <p class="text-gray-600 text-sm mb-3">${item.description}</p>
             <div class="flex items-center justify-between mb-3">
                 <span class="text-2xl font-bold" style="color: var(--primary);">₹${item.price}</span>
-                <span class="stock-badge ${item.stock > 200 ? 'stock-high' : item.stock > 50 ? 'stock-medium' : 'stock-low'}">
-                    ${item.stock} in stock
-                </span>
+                <span class="stock-badge ${item.stock > 200 ? 'stock-high' : item.stock > 50 ? 'stock-medium' : 'stock-low'}">${item.stock} in stock</span>
             </div>
-            <div class="flex gap-2 mb-2">
+            <div class="flex gap-2">
                 <button onclick="addToCart(${item.id})" class="btn-primary flex-1">Add to Cart</button>
                 <button onclick="removeFromWishlist(${item.id})" class="btn-secondary flex-1">Remove</button>
             </div>
@@ -703,7 +655,6 @@ function updateCartSummary() {
     const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
     const delivery = subtotal > 500 ? 0 : 50;
     const total = subtotal + delivery;
-    
     document.getElementById('cartSubtotal').textContent = `₹${subtotal}`;
     document.getElementById('cartDelivery').textContent = delivery === 0 ? 'FREE' : `₹${delivery}`;
     document.getElementById('cartTotal').textContent = `₹${total}`;
@@ -714,11 +665,7 @@ function placeOrder() {
         showAlert('Your cart is empty!', 'error');
         return;
     }
-    
-    // Here you would typically send the order to a backend
     showAlert('Order placed successfully! 🎉', 'success');
-    
-    // Clear cart and redirect to orders
     cart = [];
     updateCartCount();
     showUserSection('orders');
@@ -733,12 +680,10 @@ function displayStores() {
                     <h3 class="text-xl font-bold text-gray-800 mb-1">${store.name}</h3>
                     <p class="text-sm text-gray-600">${store.address}</p>
                 </div>
-                <span class="badge ${store.open ? 'bg-green-500' : 'bg-red-500'}">${store.open ? 'Open' : 'Closed'}</span>
+                <span class="badge" style="background:${store.open ? '#22c55e' : '#ef4444'}">${store.open ? 'Open' : 'Closed'}</span>
             </div>
             <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center text-yellow-500">
-                    ⭐ <span class="font-semibold ml-1">${store.rating}</span>
-                </div>
+                <div>⭐ <span class="font-semibold">${store.rating}</span></div>
                 <span class="text-gray-600 text-sm">${store.distance}</span>
             </div>
             <div class="flex gap-2">
@@ -751,7 +696,7 @@ function displayStores() {
 
 function initializeChatbot() {
     if (chatHistory.length === 0) {
-        addMessage('ai', 'Hello! I\'m your AI health assistant. I can help you find medicine alternatives, explain side effects, and provide health advice. How can I help you today?');
+        addMessage('ai', "Hello! I'm your AI health assistant. I can help you find medicine alternatives, explain side effects, and provide health advice. How can I help you today?");
     }
 }
 
@@ -780,12 +725,12 @@ function removeLoadingMessage() {
     if (loadingMsg) loadingMsg.remove();
 }
 
+// ============================================
+// CHATBOT - FIXED sendMessage function
+// ============================================
 async function sendMessage() {
-    // 🤖 Claude AI Integration - Uses Anthropic's Claude 3 Sonnet for advanced medical AI responses
-    // Setup: Get API key from https://console.anthropic.com/ and replace 'YOUR_ANTHROPIC_API_KEY_HERE'
     const input = document.getElementById('chatInput');
     const message = input.value.trim();
-
     if (!message) return;
 
     addMessage('user', message);
@@ -793,128 +738,61 @@ async function sendMessage() {
     addLoadingMessage();
 
     try {
-  // Using Groq API for fast AI responses
-const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'Authorization': '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' // 🔑 Replace with your Groq API key
-    },
-    body: JSON.stringify({
-        model: 'llama3-70b-8192', // Best Groq model (or llama3-8b-8192 for faster/cheaper)
-        messages: [
-            {
-                role: 'system',
-                content: `You are LACIDEM, a highly knowledgeable and helpful AI health assistant in a medical management system.
-You provide accurate, evidence-based information about medicines, health conditions, and medical advice.`
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer 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'
             },
-            {
-                role: 'user',
-                content: "Hello"
-            }
-        ],
-        max_tokens: 1000,
-        temperature: 0.7
-    })
-});
-
-const data = await response.json();
-console.log(data.choices[0].message.content);
-
-
-Key guidelines:
-- Always be helpful, accurate, and professional
-- Provide information about medicine alternatives, side effects, and usage
-- Include appropriate medical disclaimers
-- Recommend consulting healthcare professionals for serious conditions
-- Use clear, easy-to-understand language
-- Stay within your scope as a medical information assistant
-- Be concise but comprehensive in your responses
-
-Remember: You are not a replacement for professional medical advice.`,
-                messages: [{
-                    role: 'user',
-                    content: message
-                }]
+            body: JSON.stringify({
+                model: 'llama3-70b-8192',
+                messages: [
+                    {
+                        role: 'system',
+                        content: `You are LACIDEM, a highly knowledgeable and helpful AI health assistant in a medical management system. You provide accurate, evidence-based information about medicines, health conditions, and medical advice. Always be helpful, accurate, and professional. Include appropriate medical disclaimers and recommend consulting healthcare professionals for serious conditions. You are not a replacement for professional medical advice.`
+                    },
+                    {
+                        role: 'user',
+                        content: message
+                    }
+                ],
+                max_tokens: 1000,
+                temperature: 0.7
             })
         });
 
         const data = await response.json();
         removeLoadingMessage();
 
-        if (response.ok && data.content && data.content[0]) {
-            addMessage('ai', data.content[0].text);
+        if (response.ok && data.choices && data.choices[0]) {
+            addMessage('ai', data.choices[0].message.content);
         } else {
-            // Fallback to mock responses if API fails
-            const fallbackResponse = generateFallbackResponse(message.toLowerCase());
-            addMessage('ai', fallbackResponse + '\n\n*Note: Using offline mode due to API connection issue.*');
+            addMessage('ai', generateFallbackResponse(message.toLowerCase()) + '\n\n(Offline mode - AI unavailable)');
         }
     } catch (error) {
         removeLoadingMessage();
-        console.error('Claude API Error:', error);
-        // Fallback to mock responses
-        const fallbackResponse = generateFallbackResponse(message.toLowerCase());
-        addMessage('ai', fallbackResponse + '\n\n*Note: Claude AI is currently unavailable. Using offline assistance.*');
+        addMessage('ai', generateFallbackResponse(message.toLowerCase()) + '\n\n(Offline mode - AI unavailable)');
     }
 }
 
 function generateFallbackResponse(message) {
-    // Mock AI responses based on keywords
-    if (message.includes('paracetamol') || message.includes('pain') || message.includes('fever')) {
-        return "Paracetamol is commonly used for pain relief and reducing fever. Alternatives include Ibuprofen (better for inflammation) or Aspirin. Always follow dosage instructions and consult a doctor if symptoms persist. Remember to consult a healthcare professional for personalized medical advice.";
-    }
-
-    if (message.includes('headache') || message.includes('migraine')) {
-        return "For headaches, Paracetamol or Ibuprofen are usually effective. Stay hydrated, rest in a dark room, and avoid triggers like bright lights. If headaches are frequent or severe, please consult a doctor to rule out underlying conditions.";
-    }
-
-    if (message.includes('antibiotic') || message.includes('infection')) {
-        return "Antibiotics should only be taken when prescribed by a doctor for bacterial infections. Common ones include Amoxicillin, Azithromycin, or Ciprofloxacin. Never take leftover antibiotics, and always complete the full course. Consult your doctor for proper diagnosis.";
-    }
-
-    if (message.includes('vitamin') || message.includes('supplement')) {
-        return "Vitamin D3 is essential for bone health and immune function. Vitamin C supports immune health. Always check with your doctor before starting supplements, especially if you have medical conditions or take other medications.";
-    }
-
-    if (message.includes('diabetes') || message.includes('blood sugar')) {
-        return "For diabetes management, Metformin is commonly prescribed. Monitor blood sugar regularly, maintain a healthy diet, and exercise regularly. Always consult your endocrinologist for personalized management plans.";
-    }
-
-    if (message.includes('allergy') || message.includes('cetirizine')) {
-        return "Cetirizine (10mg) is effective for allergies. It can cause drowsiness, so avoid driving. Loratadine is a non-drowsy alternative. Consult an allergist for severe allergies.";
-    }
-
-    if (message.includes('acidity') || message.includes('gerd') || message.includes('omeprazole')) {
-        return "Omeprazole helps with acid reflux and GERD. Take it 30 minutes before meals. Lifestyle changes like avoiding spicy foods and eating smaller meals can help. See a gastroenterologist if symptoms persist.";
-
-    }
-
-    if (message.includes('alternative') || message.includes('generic')) {
-        return "Many branded medicines have generic equivalents that are equally effective but cheaper. For example, Paracetamol is available as generic acetaminophen. Always consult your doctor before switching medications.";
-    }
-
-    if (message.includes('side effect') || message.includes('side effects')) {
-        return "Common side effects vary by medication. For example, antibiotics can cause stomach upset, painkillers might cause nausea. Always read the package insert and consult your doctor about concerns. Stop medication and seek medical help if you experience severe reactions.";
-    }
-
-    if (message.includes('dosage') || message.includes('how much') || message.includes('how many')) {
-        return "Dosage depends on age, weight, and condition. Never exceed recommended doses. For adults: Paracetamol 500mg every 4-6 hours (max 4g/day), Ibuprofen 400mg every 6-8 hours. Always follow your doctor's prescription and package instructions.";
-    }
-
-    if (message.includes('pregnant') || message.includes('pregnancy') || message.includes('breastfeeding')) {
-        return "During pregnancy or breastfeeding, consult your obstetrician before taking any medication. Some medicines are safe, others are not. Never self-medicate during these periods.";
-    }
-
-    if (message.includes('children') || message.includes('kids') || message.includes('baby')) {
-        return "Children's dosages are different and often weight-based. Pediatric medications come in syrups or chewable forms. Always consult a pediatrician for children's medications.";
-    }
-
-    if (message.includes('interaction') || message.includes('together')) {
-        return "Some medications interact dangerously. For example, certain antibiotics reduce birth control effectiveness. Always inform your doctor about all medications you're taking, including supplements.";
-    }
-
-    // Default response
-    return "I'm here to help with medicine information, alternatives, side effects, and general health advice. Please ask about specific medications, symptoms, or health concerns. For serious conditions or emergencies, please consult a healthcare professional immediately.";
+    if (message.includes('paracetamol') || message.includes('pain') || message.includes('fever'))
+        return "Paracetamol is commonly used for pain relief and fever. Alternatives include Ibuprofen or Aspirin. Always follow dosage instructions and consult a doctor if symptoms persist.";
+    if (message.includes('headache') || message.includes('migraine'))
+        return "For headaches, Paracetamol or Ibuprofen are usually effective. Stay hydrated and rest. If headaches are frequent or severe, please consult a doctor.";
+    if (message.includes('antibiotic') || message.includes('infection'))
+        return "Antibiotics should only be taken when prescribed by a doctor. Always complete the full course. Consult your doctor for proper diagnosis.";
+    if (message.includes('vitamin') || message.includes('supplement'))
+        return "Vitamin D3 is essential for bone health. Always check with your doctor before starting supplements.";
+    if (message.includes('diabetes') || message.includes('blood sugar'))
+        return "For diabetes management, Metformin is commonly prescribed. Monitor blood sugar regularly and consult your endocrinologist.";
+    if (message.includes('allergy') || message.includes('cetirizine'))
+        return "Cetirizine (10mg) is effective for allergies. It can cause drowsiness. Loratadine is a non-drowsy alternative.";
+    if (message.includes('acidity') || message.includes('gerd') || message.includes('omeprazole'))
+        return "Omeprazole helps with acid reflux and GERD. Take it 30 minutes before meals.";
+    if (message.includes('side effect'))
+        return "Side effects vary by medication. Always read the package insert and consult your doctor. Stop medication and seek help if you experience severe reactions.";
+    return "I'm here to help with medicine information, alternatives, side effects, and general health advice. For serious conditions or emergencies, please consult a healthcare professional immediately.";
 }
 
 function askQuickQuestion(question) {
@@ -934,7 +812,7 @@ function displayNews() {
                 </div>
                 <h3 class="text-xl font-bold text-gray-800 mb-2">${news.title}</h3>
                 <p class="text-gray-600 mb-4">${news.summary}</p>
-                <button style="color: var(--primary); font-weight: 600;">Read More →</button>
+                <button style="color: var(--primary); font-weight: 600; background:none; border:none; cursor:pointer;">Read More →</button>
             </div>
         </div>
     `).join('');
@@ -945,7 +823,6 @@ function displayUserOrders() {
         { id: 'ORD-001', date: 'Jan 10, 2026', items: 3, total: 450, status: 'Delivered' },
         { id: 'ORD-002', date: 'Jan 9, 2026', items: 2, total: 320, status: 'Out for Delivery' },
     ];
-    
     const container = document.getElementById('ordersList');
     container.innerHTML = orders.map(order => `
         <div class="bg-white rounded-xl p-6 shadow-lg">
@@ -954,7 +831,7 @@ function displayUserOrders() {
                     <h3 class="text-xl font-bold text-gray-800">${order.id}</h3>
                     <p class="text-sm text-gray-600">${order.date}</p>
                 </div>
-                <span class="badge ${order.status === 'Delivered' ? 'bg-green-500' : 'bg-blue-500'}">${order.status}</span>
+                <span class="badge" style="background:${order.status === 'Delivered' ? '#22c55e' : '#3b82f6'}">${order.status}</span>
             </div>
             <div class="flex items-center justify-between mb-4">
                 <span class="text-gray-600">${order.items} items</span>
@@ -973,7 +850,6 @@ function displayUserOrders() {
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
     showPage('loginPage');
-    // Show admin form by default
     const adminButton = document.querySelector('.role-btn.active');
     if (adminButton) {
         showLogin('admin', adminButton);
