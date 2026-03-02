@@ -700,6 +700,15 @@ function initializeChatbot() {
     }
 }
 
+const SYSTEM_PROMPT = `You are LACIDEM, a knowledgeable and friendly AI health assistant built into a medical management system. You help users with:
+- Medicine information, dosage, and usage
+- Alternatives to common medications
+- Side effects and drug interactions
+- General health advice and wellness tips
+- Locating medicines and understanding prescriptions
+
+Always be clear, accurate, and professional. Include brief medical disclaimers where appropriate and recommend consulting a healthcare professional for serious conditions. Keep responses concise and easy to understand. You are not a replacement for professional medical advice.`;
+
 function addMessage(type, text) {
     const container = document.getElementById('chatMessages');
     const messageDiv = document.createElement('div');
@@ -707,71 +716,113 @@ function addMessage(type, text) {
     messageDiv.textContent = text;
     container.appendChild(messageDiv);
     container.scrollTop = container.scrollHeight;
-    chatHistory.push({ type, text });
+    chatHistory.push({ role: type === 'user' ? 'user' : 'assistant', content: text });
 }
 
-function addLoadingMessage() {
+function createStreamingBubble() {
     const container = document.getElementById('chatMessages');
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message ai';
-    messageDiv.id = 'loadingMessage';
+    messageDiv.id = 'streamingMessage';
     messageDiv.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
     container.appendChild(messageDiv);
     container.scrollTop = container.scrollHeight;
-}
-
-function removeLoadingMessage() {
-    const loadingMsg = document.getElementById('loadingMessage');
-    if (loadingMsg) loadingMsg.remove();
+    return messageDiv;
 }
 
 // ============================================
-// CHATBOT - FIXED sendMessage function
+// CHATBOT - Real-time Anthropic Streaming
 // ============================================
 async function sendMessage() {
     const input = document.getElementById('chatInput');
+    const sendBtn = document.querySelector('#userChatbot .btn-primary');
     const message = input.value.trim();
     if (!message) return;
 
+    // Disable input while streaming
+    input.disabled = true;
+    if (sendBtn) sendBtn.disabled = true;
+
     addMessage('user', message);
     input.value = '';
-    addLoadingMessage();
+
+    // Build message history for context (last 10 turns)
+    const recentHistory = chatHistory.slice(-10);
+    const messages = recentHistory.map(m => ({ role: m.role, content: m.content }));
+
+    // Create streaming bubble
+    const bubble = createStreamingBubble();
+    let fullText = '';
+    let started = false;
 
     try {
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer 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'
+                'x-api-key': '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',        // ← Paste your Anthropic API key here
+                'anthropic-version': '2023-06-01',
+                'anthropic-dangerous-direct-browser-access': 'true'
             },
             body: JSON.stringify({
-                model: 'llama3-70b-8192',
-                messages: [
-                    {
-                        role: 'system',
-                        content: `You are LACIDEM, a highly knowledgeable and helpful AI health assistant in a medical management system. You provide accurate, evidence-based information about medicines, health conditions, and medical advice. Always be helpful, accurate, and professional. Include appropriate medical disclaimers and recommend consulting healthcare professionals for serious conditions. You are not a replacement for professional medical advice.`
-                    },
-                    {
-                        role: 'user',
-                        content: message
-                    }
-                ],
-                max_tokens: 1000,
-                temperature: 0.7
+                model: 'claude-haiku-4-5-20251001',
+                max_tokens: 1024,
+                system: SYSTEM_PROMPT,
+                messages: messages,
+                stream: true
             })
         });
 
-        const data = await response.json();
-        removeLoadingMessage();
-
-        if (response.ok && data.choices && data.choices[0]) {
-            addMessage('ai', data.choices[0].message.content);
-        } else {
-            addMessage('ai', generateFallbackResponse(message.toLowerCase()) + '\n\n(Offline mode - AI unavailable)');
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
         }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split('\n');
+
+            for (const line of lines) {
+                if (!line.startsWith('data: ')) continue;
+                const data = line.slice(6).trim();
+                if (data === '[DONE]' || !data) continue;
+
+                try {
+                    const parsed = JSON.parse(data);
+                    if (parsed.type === 'content_block_delta' && parsed.delta?.type === 'text_delta') {
+                        if (!started) {
+                            bubble.innerHTML = '';
+                            started = true;
+                        }
+                        fullText += parsed.delta.text;
+                        bubble.textContent = fullText;
+                        document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+                    }
+                } catch (e) { /* skip malformed chunks */ }
+            }
+        }
+
+        bubble.removeAttribute('id');
+        if (fullText) {
+            chatHistory.push({ role: 'assistant', content: fullText });
+        }
+
     } catch (error) {
-        removeLoadingMessage();
-        addMessage('ai', generateFallbackResponse(message.toLowerCase()) + '\n\n(Offline mode - AI unavailable)');
+        console.error('Streaming error:', error);
+        bubble.innerHTML = '';
+        const fallback = generateFallbackResponse(message.toLowerCase());
+        bubble.textContent = fallback;
+        bubble.removeAttribute('id');
+        chatHistory.push({ role: 'assistant', content: fallback });
+    } finally {
+        input.disabled = false;
+        if (sendBtn) sendBtn.disabled = false;
+        input.focus();
     }
 }
 
