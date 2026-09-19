@@ -700,7 +700,7 @@ function displayStores() {
 // ============================================
 
 // ⬇️  PASTE YOUR ANTHROPIC API KEY HERE (get it from console.anthropic.com)
-const ANTHROPIC_API_KEY = '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';
+const ANTHROPIC_API_KEY = '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';
 
 const NURSE_PROMPT = `You are Nurse Nina, a warm and expert virtual nurse for LACIDEM pharmacy system.
 
@@ -782,7 +782,7 @@ async function sendMessage() {
     document.getElementById('chatMessages').scrollTop = 99999;
 
     // Check API key
-        if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === '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') {
+        if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === 'YOUR_API_KEY_HERE') {
         document.getElementById('nurseTyping')?.remove();
         appendBubble('ai', '⚠️ <strong>API key not set!</strong><br>Open <code>script.js</code>, find line:<br><code>const ANTHROPIC_API_KEY = \'YOUR_API_KEY_HERE\';</code><br>and replace with your key from <a href="https://console.anthropic.com" target="_blank" style="color:var(--primary)">console.anthropic.com</a>');
         input.disabled = false;
