@@ -700,7 +700,7 @@ function displayStores() {
 // ============================================
 
 // ⬇️  PASTE YOUR ANTHROPIC API KEY HERE (get it from console.anthropic.com)
-const ANTHROPIC_API_KEY = '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';
+const OPENROUTER_API_KEY = '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';
 
 const NURSE_PROMPT = `You are Nurse Nina, a warm and expert virtual nurse for LACIDEM pharmacy system.
 
@@ -782,7 +782,7 @@ async function sendMessage() {
     document.getElementById('chatMessages').scrollTop = 99999;
 
     // Check API key
-        if (!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === 'YOUR_API_KEY_HERE') {
+     if (!OPENROUTER_API_KEY || OPENROUTER_API_KEY === 'PASTE_YOUR_NEW_OPENROUTER_KEY_HERE') {
         document.getElementById('nurseTyping')?.remove();
         appendBubble('ai', '⚠️ <strong>API key not set!</strong><br>Open <code>script.js</code>, find line:<br><code>const ANTHROPIC_API_KEY = \'YOUR_API_KEY_HERE\';</code><br>and replace with your key from <a href="https://console.anthropic.com" target="_blank" style="color:var(--primary)">console.anthropic.com</a>');
         input.disabled = false;
@@ -794,21 +794,23 @@ async function sendMessage() {
         // last 10 messages for context
         const messages = chatHistory.slice(-10).map(m => ({ role: m.role, content: m.content }));
 
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': ANTHROPIC_API_KEY,
-                'anthropic-version': '2023-06-01',
-                'anthropic-dangerous-direct-browser-access': 'true'
-            },
-            body: JSON.stringify({
-                model: 'claude-haiku-4-5-20251001',
-                max_tokens: 1500,
-                system: NURSE_PROMPT,
-                messages: messages
-            })
-        });
+       const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'LACIDEM Medical Tool'
+    },
+    body: JSON.stringify({
+        model: 'openai/gpt-4o-mini',
+        max_tokens: 1500,
+        messages: [
+            { role: 'system', content: NURSE_PROMPT },
+            ...messages
+        ]
+    })
+});
 
         document.getElementById('nurseTyping')?.remove();
 
@@ -818,7 +820,11 @@ async function sendMessage() {
         }
 
         const data = await res.json();
-        const fullText = data.content[0].text;
+      const fullText = data.choices?.[0]?.message?.content;
+
+if (!fullText) {
+    throw new Error('No response was returned by OpenRouter');
+}
         chatHistory.push({ role: 'assistant', content: fullText });
 
         // Typewriter effect
