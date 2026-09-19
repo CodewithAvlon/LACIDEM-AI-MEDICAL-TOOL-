@@ -36,9 +36,9 @@ LACIDEM/
 - **Phone:** `9876543210`
 - **Password:** `pass456`
 
-## 🤖 AI Health Assistant (Powered by Claude)
+## 🤖 AI Health Assistant (Powered by OpenRouter)
 
-LACIDEM features an advanced AI health assistant powered by **Anthropic's Claude 3 Sonnet** - one of the most capable AI models available.
+LACIDEM features an advanced AI health assistant powered by **openRouter api key** - one of the most capable AI models available.
 
 ##API INTEGRATION
 api key from OPENRouter>
@@ -145,7 +145,7 @@ The application is fully responsive and works on:
 
 ### AI Chatbot not working?
 - Check internet connection
-- Verify Claude API access
+- Verify OpenRouter API access
 - Check browser console for errors
 
 ### Styling issues?
