@@ -40,10 +40,10 @@ LACIDEM/
 
 LACIDEM features an advanced AI health assistant powered by **Anthropic's Claude 3 Sonnet** - one of the most capable AI models available.
 
-### Setup Claude AI Integration
-1. Get an API key from [Anthropic Console](https://console.anthropic.com/)
-2. Follow the setup instructions in `CLAUDE_SETUP.md`
-3. Replace the placeholder API key in `script.js`
+##API INTEGRATION
+api key from OPENRouter>
+was free for about 100-credits
+
 
 ### AI Features
 - **Medical Knowledge**: Comprehensive information about medicines, conditions, and treatments
