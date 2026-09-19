@@ -782,7 +782,7 @@ async function sendMessage() {
     document.getElementById('chatMessages').scrollTop = 99999;
 
     // Check API key
-     if (!OPENROUTER_API_KEY || OPENROUTER_API_KEY === 'PASTE_YOUR_NEW_OPENROUTER_KEY_HERE') {
+     if (!OPENROUTER_API_KEY || OPENROUTER_API_KEY === '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') {
         document.getElementById('nurseTyping')?.remove();
         appendBubble('ai', '⚠️ <strong>API key not set!</strong><br>Open <code>script.js</code>, find line:<br><code>const ANTHROPIC_API_KEY = \'YOUR_API_KEY_HERE\';</code><br>and replace with your key from <a href="https://console.anthropic.com" target="_blank" style="color:var(--primary)">console.anthropic.com</a>');
         input.disabled = false;
